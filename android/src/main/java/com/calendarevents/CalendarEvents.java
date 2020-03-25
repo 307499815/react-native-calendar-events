@@ -549,11 +549,25 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
                 }
 
                 String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, daysOfWeek, weekStart, weekPositionInMonth);
+
                 if (duration != null) {
                     eventValues.put(CalendarContract.Events.DURATION, duration);
                 }
                 if (rule != null) {
                     eventValues.put(CalendarContract.Events.RRULE, rule);
+                }
+            } else {
+                // 自定义格式
+                if(recurrenceRule.hasKey("rrule")) {
+                    String rule = recurrenceRule.getString("rrule");
+                    String duration = recurrenceRule.getString("duration");
+                    if(duration != null) {
+                        eventValues.put(CalendarContract.Events.DURATION, duration);
+                    }
+
+                    if(rule != null) {
+                        eventValues.put(CalendarContract.Events.RRULE, rule);
+                    }
                 }
             }
         }
