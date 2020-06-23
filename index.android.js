@@ -36,9 +36,16 @@ export default {
   async saveEvent (title, details, options = {sync: false}) {
     return CalendarEvents.saveEvent(title, details, options)
   },
+  async saveEvents (detailsList, options = {sync: false}) {
+    return CalendarEvents.saveEvents(detailsList, options)
+  },
 
   async removeEvent (id, options = {sync: false}) {
     return CalendarEvents.removeEvent(id, options)
+  },
+
+  async removeEvents (ids, options = {sync: false}) {
+    return CalendarEvents.removeEvents(ids, options)
   },
 
   async uriForCalendar () {

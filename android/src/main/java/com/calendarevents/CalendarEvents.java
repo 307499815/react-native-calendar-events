@@ -135,29 +135,38 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
 
     private WritableNativeMap findCalendarById(String calendarID) {
 
-        WritableNativeMap result;
-        Cursor cursor;
+        WritableNativeMap result = null;
+        Cursor cursor = null;
         ContentResolver cr = reactContext.getContentResolver();
         Uri uri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, Integer.parseInt(calendarID));
 
         String IS_PRIMARY = CalendarContract.Calendars.IS_PRIMARY == null ? "0" : CalendarContract.Calendars.IS_PRIMARY;
 
-        cursor = cr.query(uri, new String[]{
-                CalendarContract.Calendars._ID,
-                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
-                CalendarContract.Calendars.ACCOUNT_NAME,
-                IS_PRIMARY,
-                CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
-                CalendarContract.Calendars.ALLOWED_AVAILABILITY,
-                CalendarContract.Calendars.ACCOUNT_TYPE,
-                CalendarContract.Calendars.CALENDAR_COLOR
-        }, null, null, null);
+        try {
+            cursor = cr.query(uri, new String[]{
+                    CalendarContract.Calendars._ID,
+                    CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+                    CalendarContract.Calendars.ACCOUNT_NAME,
+                    IS_PRIMARY,
+                    CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
+                    CalendarContract.Calendars.ALLOWED_AVAILABILITY,
+                    CalendarContract.Calendars.ACCOUNT_TYPE,
+                    CalendarContract.Calendars.CALENDAR_COLOR
+            }, null, null, null);
 
-        if (cursor != null && cursor.moveToFirst()) {
-            result = serializeEventCalendar(cursor);
-            cursor.close();
-        } else {
-            result = null;
+            if (cursor != null && cursor.moveToFirst()) {
+                result = serializeEventCalendar(cursor);
+                cursor.close();
+
+            }
+
+            cursor = null;
+
+        } finally {
+            if(cursor != null) {
+                cursor.close();
+                cursor = null;
+            }
         }
 
         return result;
@@ -365,29 +374,35 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
 
         String selection = "((" + CalendarContract.Events.DELETED + " != 1))";
 
-        cursor = cr.query(uri, new String[]{
-                CalendarContract.Events._ID,
-                CalendarContract.Events.TITLE,
-                CalendarContract.Events.DESCRIPTION,
-                CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND,
-                CalendarContract.Events.ALL_DAY,
-                CalendarContract.Events.EVENT_LOCATION,
-                CalendarContract.Events.RRULE,
-                CalendarContract.Events.CALENDAR_ID,
-                CalendarContract.Events.AVAILABILITY,
-                CalendarContract.Events.HAS_ALARM,
-                CalendarContract.Instances.DURATION
-        }, selection, null, null);
+        try {
+            cursor = cr.query(uri, new String[]{
+                    CalendarContract.Events._ID,
+                    CalendarContract.Events.TITLE,
+                    CalendarContract.Events.DESCRIPTION,
+                    CalendarContract.Events.DTSTART,
+                    CalendarContract.Events.DTEND,
+                    CalendarContract.Events.ALL_DAY,
+                    CalendarContract.Events.EVENT_LOCATION,
+                    CalendarContract.Events.RRULE,
+                    CalendarContract.Events.CALENDAR_ID,
+                    CalendarContract.Events.AVAILABILITY,
+                    CalendarContract.Events.HAS_ALARM,
+                    CalendarContract.Instances.DURATION
+            }, selection, null, null);
 
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            result = serializeEvent(cursor);
-        } else {
-            result = null;
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                result = serializeEvent(cursor);
+            } else {
+                result = null;
+            }
         }
-
-        cursor.close();
+        finally {
+            if(cursor != null) {
+                cursor.close();
+                cursor = null;
+            }
+        }
 
         return result;
     }
@@ -1274,6 +1289,35 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void saveEvents(final ReadableArray detailsList, final ReadableMap options, final Promise promise) {
+        if (this.haveCalendarReadWritePermissions()) {
+            try {
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        WritableNativeArray res = new WritableNativeArray();
+                        for(int i = 0; i < detailsList.size(); i++) {
+                            ReadableMap details = detailsList.getMap(i);
+                            try {
+                                int eventId = addEvent(details.getString("title"), details, options);
+                                res.pushString(String.valueOf(eventId));
+                            } catch (ParseException e) {
+                                // skip
+                            }
+                        }
+                        promise.resolve(res);
+                    }
+                });
+                thread.start();
+            } catch (Exception e) {
+                promise.reject("add event error", e.getMessage());
+            }
+        } else {
+            promise.reject("add event error", "you don't have permissions to add an event to the users calendar");
+        }
+    }
+
+    @ReactMethod
     public void findAllEvents(final Dynamic startDate, final Dynamic endDate, final ReadableArray calendars, final Promise promise) {
 
         if (this.haveCalendarReadWritePermissions()) {
@@ -1327,6 +1371,37 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
                     public void run() {
                         boolean successful = removeEvent(eventID, options);
                         promise.resolve(successful);
+                    }
+                });
+                thread.start();
+
+            } catch (Exception e) {
+                promise.reject("error removing event", e.getMessage());
+            }
+        } else {
+            promise.reject("remove event error", "you don't have permissions to remove an event from the users calendar");
+        }
+
+    }
+
+    @ReactMethod
+    public void removeEvents(final ReadableArray eventIDs, final ReadableMap options, final Promise promise) {
+        if (this.haveCalendarReadWritePermissions()) {
+            try {
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        WritableNativeArray res = new WritableNativeArray();
+                        if(eventIDs.size() <= 0) {
+                            promise.resolve(res);
+                            return;
+                        }
+
+                        for(int i = 0; i < eventIDs.size(); i++) {
+                            boolean successful = removeEvent(eventIDs.getString(i), options);
+                            res.pushBoolean(successful);
+                        }
+                        promise.resolve(res);
                     }
                 });
                 thread.start();

@@ -203,6 +203,12 @@ export default class ReactNativeCalendarEvents {
     details: CalendarEventWritable,
     options?: Options
   ): Promise<string>;
+
+  static saveEvents(
+    detailsList: CalendarEventWritable[],
+    options?: Options
+  ): Promise<string>
+
   /**
    * Removes calendar event.
    * @param id - The event id
@@ -210,4 +216,5 @@ export default class ReactNativeCalendarEvents {
    * @returns - Promise resolving to boolean to indicate if removal succeeded.
    */
   static removeEvent(id: string, options?: Options): Promise<boolean>;
+  static removeEvents(ids: string[], options?: Options): Promise<boolean[]>;
 }
