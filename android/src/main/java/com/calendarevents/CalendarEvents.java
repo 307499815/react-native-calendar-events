@@ -1194,10 +1194,8 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
             promise.resolve("authorized");
         } else if (!permissionRequested) {
             promise.resolve("undetermined");
-        } else if(this.shouldShowRequestPermissionRationale()) {
-            promise.resolve("denied"); 
         } else {
-            promise.resolve("restricted");
+            promise.resolve("denied");
         }
     }
 
