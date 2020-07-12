@@ -175,6 +175,14 @@ export default class ReactNativeCalendarEvents {
    * @param calendar - Calendar to create
    */
   static saveCalendar(calendar: CalendarOptions): Promise<string>;
+  
+  /**
+  * Removes a calendar.
+  * @param id - The calendar id
+  * @returns - Promise resolving to boolean to indicate if removal succeeded.
+  */
+  static removeCalendar(id: string): Promise<boolean>;
+
   /**
    * Find calendar event by id.
    * @param id - Event ID
