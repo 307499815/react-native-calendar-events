@@ -697,7 +697,8 @@ public class CalendarEvents extends ReactContextBaseJavaModule {
                 if (calendar != null) {
                     eventValues.put(CalendarContract.Events.CALENDAR_ID, Integer.parseInt(calendar.getString("id")));
                 } else {
-                    eventValues.put(CalendarContract.Events.CALENDAR_ID, 1);
+                    throw new ParseException("calendar not exists");
+                    //eventValues.put(CalendarContract.Events.CALENDAR_ID, 1);
                 }
 
             } else {
