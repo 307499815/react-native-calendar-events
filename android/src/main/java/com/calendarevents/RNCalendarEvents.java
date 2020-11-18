@@ -1410,6 +1410,66 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
         }
 
     }
+    
+    @ReactMethod
+    public void saveEvents(final ReadableArray detailsList, final ReadableMap options, final Promise promise) {
+        if (this.haveCalendarReadWritePermissions()) {
+            try {
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        WritableNativeArray res = new WritableNativeArray();
+                        for(int i = 0; i < detailsList.size(); i++) {
+                            ReadableMap details = detailsList.getMap(i);
+                            try {
+                                int eventId = addEvent(details.getString("title"), details, options);
+                                res.pushString(String.valueOf(eventId));
+                            } catch (ParseException e) {
+                                // skip
+                            }
+                        }
+                        promise.resolve(res);
+                    }
+                });
+                thread.start();
+            } catch (Exception e) {
+                promise.reject("add event error", e.getMessage());
+            }
+        } else {
+            promise.reject("add event error", "you don't have permissions to add an event to the users calendar");
+        }
+    }
+    
+    @ReactMethod
+    public void removeEvents(final ReadableArray eventIDs, final ReadableMap options, final Promise promise) {
+        if (this.haveCalendarReadWritePermissions()) {
+            try {
+                Thread thread = new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        WritableNativeArray res = new WritableNativeArray();
+                        if(eventIDs.size() <= 0) {
+                            promise.resolve(res);
+                            return;
+                        }
+
+                        for(int i = 0; i < eventIDs.size(); i++) {
+                            boolean successful = removeEvent(eventIDs.getString(i), options);
+                            res.pushBoolean(successful);
+                        }
+                        promise.resolve(res);
+                    }
+                });
+                thread.start();
+
+            } catch (Exception e) {
+                promise.reject("error removing event", e.getMessage());
+            }
+        } else {
+            promise.reject("remove event error", "you don't have permissions to remove an event from the users calendar");
+        }
+
+    }
 
     @ReactMethod
     public void openEventInCalendar(int eventID) {
