@@ -40,6 +40,14 @@ export default {
   async removeEvent(id, options = { sync: false }) {
     return RNCalendarEvents.removeEvent(id, options);
   },
+  
+  async saveEvents (detailsList, options = {sync: false}) {
+    return CalendarEvents.saveEvents(detailsList, options)
+  },
+  
+  async removeEvents (ids, options = {sync: false}) {
+    return CalendarEvents.removeEvents(ids, options)
+  },
 
   async uriForCalendar() {
     return RNCalendarEvents.uriForCalendar();
