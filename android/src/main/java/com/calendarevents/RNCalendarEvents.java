@@ -1413,7 +1413,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
     
     @ReactMethod
     public void saveEvents(final ReadableArray detailsList, final ReadableMap options, final Promise promise) {
-        if (this.haveCalendarReadWritePermissions()) {
+        if (this.haveCalendarPermissions(false)) {
             try {
                 Thread thread = new Thread(new Runnable(){
                     @Override
@@ -1442,7 +1442,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
     
     @ReactMethod
     public void removeEvents(final ReadableArray eventIDs, final ReadableMap options, final Promise promise) {
-        if (this.haveCalendarReadWritePermissions()) {
+        if (this.haveCalendarPermissions(false)) {
             try {
                 Thread thread = new Thread(new Runnable(){
                     @Override
