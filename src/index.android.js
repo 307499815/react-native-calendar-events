@@ -42,11 +42,11 @@ export default {
   },
   
   async saveEvents (detailsList, options = {sync: false}) {
-    return CalendarEvents.saveEvents(detailsList, options)
+    return RNCalendarEvents.saveEvents(detailsList, options)
   },
   
   async removeEvents (ids, options = {sync: false}) {
-    return CalendarEvents.removeEvents(ids, options)
+    return RNCalendarEvents.removeEvents(ids, options)
   },
 
   async uriForCalendar() {
