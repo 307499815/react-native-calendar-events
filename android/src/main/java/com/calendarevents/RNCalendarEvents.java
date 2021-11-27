@@ -1264,8 +1264,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
-                        WritableArray calendars = findEventCalendars();
-                        promise.resolve(calendars);
+                        try {
+                            WritableArray calendars = findEventCalendars();
+                            promise.resolve(calendars);
+                        } catch (Exception e) {
+                            promise.reject("calendar request error", e.getMessage());
+                        }
                     }
                 });
                 thread.start();
@@ -1287,12 +1291,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
             Thread thread = new Thread(new Runnable(){
                 @Override
                 public void run() {
-                    try {
-                        Integer calendarID = addCalendar(options);
-                        promise.resolve(calendarID.toString());
-                    } catch (Exception e) {
-                        promise.reject("save calendar error", e.getMessage());
-                    }
+                try {
+                    Integer calendarID = addCalendar(options);
+                    promise.resolve(calendarID.toString());
+                } catch (Exception e) {
+                    promise.reject("save calendar error", e.getMessage());
+                }
                 }
             });
             thread.start();
@@ -1308,8 +1312,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
+                    try {
                         boolean successful = removeCalendar(CalendarID);
                         promise.resolve(successful);
+                    } catch (Exception e) {
+                        promise.reject("error removing calendar", e.getMessage());
+                    }
                     }
                 });
                 thread.start();
@@ -1359,8 +1367,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
-                        WritableNativeArray results = findEvents(startDate, endDate, calendars);
-                        promise.resolve(results);
+                        try {
+                            WritableNativeArray results = findEvents(startDate, endDate, calendars);
+                            promise.resolve(results);
+                        } catch (Exception e) {
+                            promise.reject("find event error", e.getMessage());
+                        }
                     }
                 });
                 thread.start();
@@ -1381,8 +1393,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
-                        WritableMap results = findEventById(eventID);
-                        promise.resolve(results);
+                        try {
+                            WritableMap results = findEventById(eventID);
+                            promise.resolve(results);
+                        } catch (Exception e) {
+                            promise.reject("find event error", e.getMessage());
+                        }
                     }
                 });
                 thread.start();
@@ -1403,8 +1419,12 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
-                        boolean successful = removeEvent(eventID, options);
-                        promise.resolve(successful);
+                        try {
+                            boolean successful = removeEvent(eventID, options);
+                            promise.resolve(successful);
+                        } catch(Exception e) {
+                            promise.reject("error removing event", e.getMessage());
+                        }
                     }
                 });
                 thread.start();
@@ -1431,7 +1451,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                             try {
                                 int eventId = addEvent(details.getString("title"), details, options);
                                 res.pushString(String.valueOf(eventId));
-                            } catch (ParseException e) {
+                            } catch (Exception e) {
                                 // skip
                             }
                         }
@@ -1460,11 +1480,16 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                             return;
                         }
 
-                        for(int i = 0; i < eventIDs.size(); i++) {
-                            boolean successful = removeEvent(eventIDs.getString(i), options);
-                            res.pushBoolean(successful);
+                        try {
+                            for(int i = 0; i < eventIDs.size(); i++) {
+                                boolean successful = removeEvent(eventIDs.getString(i), options);
+                                res.pushBoolean(successful);
+                            }
+                            promise.resolve(res);
+                        }catch(Exception e) {
+                            promise.reject("error removing event", e.getMessage());
                         }
-                        promise.resolve(res);
+
                     }
                 });
                 thread.start();
