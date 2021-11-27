@@ -19,10 +19,18 @@ export default {
   },
 
   async saveCalendar(options = {}) {
-    return RNCalendarEvents.saveCalendar({
+    const cid = await RNCalendarEvents.saveCalendar({
       ...options,
       color: options.color ? processColor(options.color) : undefined,
     });
+    if(!cid) throw 'saveCalendar error';
+
+    const calendars = await RNCalendarEvents.findCalendars();
+    if(!calendars || !calendars.length || !calendars.some(c=>c.id==cid)) {
+      throw 'saveCalendar error';
+    }
+
+    return cid;
   },
 
   async removeCalendar(id) {
