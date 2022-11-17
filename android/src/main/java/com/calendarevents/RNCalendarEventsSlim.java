@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.Manifest;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
 import androidx.core.content.ContextCompat;
@@ -20,6 +21,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.PermissionAwareActivity;
 import com.facebook.react.modules.core.PermissionListener;
 
@@ -249,6 +251,29 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         }
 
         return rows;
+    }
+
+    private String getCalendarId(String calendarName) {
+        if(TextUtils.isEmpty(calendarName)) return null;
+
+        ContentResolver cr = reactContext.getContentResolver();
+        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+
+        String query = "(" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?" +
+                " AND "+ CalendarContract.Calendars.ACCOUNT_TYPE + " = ? )";
+        String[] args = new String[]{calendarName,CalendarContract.ACCOUNT_TYPE_LOCAL};
+
+        Cursor cursor = cr.query(uri, new String[]{
+                CalendarContract.Calendars._ID,
+        }, query, args, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String id = cursor.getString(0);
+            cursor.close();
+            return id;
+        } else {
+            return null;
+        }
     }
 
     private int bulkAddEvents(ReadableArray details) throws Exception {
@@ -671,6 +696,32 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         }
     }
 
+
+    @ReactMethod
+    public void findCalendarId(final String name, final Promise promise) {
+        if (!this.haveCalendarPermissions(false)) {
+            promise.reject("denied", new Exception("no permission"));
+            return;
+        }
+        try {
+            Thread thread = new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try {
+                        String calendarId = getCalendarId(name);
+                        promise.resolve(calendarId);
+                    } catch (Exception e) {
+                        promise.reject("find calendar error", e.getMessage());
+                    }
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            promise.reject("find calendar error", e.getMessage());
+        }
+    }
+
+
     @ReactMethod
     public void removeCalendar(final String CalendarID, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
@@ -734,15 +785,14 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                         int count = bulkAddEvents(details);
                         promise.resolve(count);
                     } catch (Exception e) {
-                        promise.reject("add event error", e.getMessage());
+                        promise.reject("saveEvents error", e.getMessage());
                     }
                 }
             });
             thread.start();
         } catch (Exception e) {
-            promise.reject("add event error", e.getMessage());
+            promise.reject("saveEvents error", e.getMessage());
         }
-
     }
 
     @ReactMethod
@@ -770,6 +820,33 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             promise.reject("error removing event", e.getMessage());
         }
     }
+
+    @ReactMethod
+    public void updateEvent(final ReadableMap detail, final Promise promise) {
+        if (!this.haveCalendarPermissions(false)) {
+            promise.reject("denied", new Exception("no permission"));
+            return;
+        }
+
+        try {
+            Thread thread = new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try {
+                        int count = updateEvent(detail);
+                        promise.resolve(count);
+                    } catch(Exception e) {
+                        promise.reject("error removing event", e.getMessage());
+                    }
+                }
+            });
+            thread.start();
+
+        } catch (Exception e) {
+            promise.reject("error removing event", e.getMessage());
+        }
+    }
+
     @ReactMethod
     public void uriForCalendar(Promise promise) {
         promise.resolve(CalendarContract.Events.CONTENT_URI.toString());

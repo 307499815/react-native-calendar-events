@@ -12,14 +12,6 @@ export default {
     return RNCalendarEvents.requestPermissions();
   },
 
-  fetchAllEvents(startDate, endDate, calendars = []) {
-    return RNCalendarEvents.fetchAllEvents(startDate, endDate, calendars);
-  },
-
-  findCalendars() {
-    return RNCalendarEvents.findCalendars();
-  },
-
   saveCalendar(options = {}) {
     return RNCalendarEvents.saveCalendar({
       ...options,

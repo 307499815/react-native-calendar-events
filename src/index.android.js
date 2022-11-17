@@ -10,51 +10,35 @@ export default {
     return RNCalendarEvents.requestPermissions(readOnly);
   },
 
-  async fetchAllEvents(startDate, endDate, calendars = []) {
-    return RNCalendarEvents.findAllEvents(startDate, endDate, calendars);
-  },
-
-  async findCalendars() {
-    return RNCalendarEvents.findCalendars();
-  },
-
   async saveCalendar(options = {}) {
-    const cid = await RNCalendarEvents.saveCalendar({
+    return await RNCalendarEvents.saveCalendar({
       ...options,
       color: options.color ? processColor(options.color) : undefined,
     });
-    if(!cid) throw 'saveCalendar error';
 
-    const calendars = await RNCalendarEvents.findCalendars();
-    if(!calendars || !calendars.length || !calendars.some(c=>c.id==cid)) {
-      throw 'saveCalendar error';
-    }
-
-    return cid;
   },
 
   async removeCalendar(id) {
     return RNCalendarEvents.removeCalendar(id);
   },
 
-  async findEventById(id) {
-    return RNCalendarEvents.findById(id);
+  async removeCalendarByName(name) {
+    return RNCalendarEvents.removeCalendarByName(name);
   },
 
-  async saveEvent(title, details, options = { sync: false }) {
-    return RNCalendarEvents.saveEvent(title, details, options);
+  async findCalendarId(name) {
+    return RNCalendarEvents.findCalendarId(name);
   },
 
-  async removeEvent(id, options = { sync: false }) {
-    return RNCalendarEvents.removeEvent(id, options);
+  async saveEvents (detailsList) {
+    return RNCalendarEvents.saveEvents(detailsList)
   },
   
-  async saveEvents (detailsList, options = {sync: false}) {
-    return RNCalendarEvents.saveEvents(detailsList, options)
+  async removeEvents (detail) {
+    return RNCalendarEvents.removeEvents(detail)
   },
-  
-  async removeEvents (ids, options = {sync: false}) {
-    return RNCalendarEvents.removeEvents(ids, options)
+  async updateEvent(detail) {
+    return RNCalendarEvents.updateEvent(detail)
   },
 
   async uriForCalendar() {
