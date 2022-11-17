@@ -21,7 +21,7 @@ public class RNCalendarEventsPackage implements ReactPackage {
             ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
 
-        modules.add(new RNCalendarEvents(reactContext));
+        modules.add(new RNCalendarEventsSlim(reactContext));
 
         return modules;
     }
