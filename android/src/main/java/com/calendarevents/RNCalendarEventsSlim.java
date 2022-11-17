@@ -36,6 +36,8 @@ import java.util.TimeZone;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.w3c.dom.Text;
+
 public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements PermissionListener {
 
     private static int PERMISSION_REQUEST_CODE = 37;
@@ -297,11 +299,18 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
+        String eventId = detail.getString("eventId");
+
+        ContentResolver cr = reactContext.getContentResolver();
+        if(!TextUtils.isEmpty(eventId)) {
+            Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, (long) Integer.parseInt(eventId));
+            return cr.delete(uri, null, null);
+        }
+
         if(TextUtils.isEmpty(title) && TextUtils.isEmpty(location) && TextUtils.isEmpty(calendarId)) {
             return 0;
         }
 
-        ContentResolver cr = reactContext.getContentResolver();
         Uri uri = CalendarContract.Calendars.CONTENT_URI;
         List<String> params = new ArrayList<>();
         String selection = "((" + CalendarContract.Events.DELETED + " != 1) ";
@@ -327,6 +336,15 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
+        String eventId = detail.getString("eventId");
+
+        ContentResolver cr = reactContext.getContentResolver();
+
+        if(!TextUtils.isEmpty(eventId)) {
+            Uri updateUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+            return cr.update(updateUri, getEventValues(detail), null, null);
+        }
+
         if(TextUtils.isEmpty(title) && TextUtils.isEmpty(location) && TextUtils.isEmpty(calendarId)) {
             return 0;
         }
@@ -348,7 +366,6 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         }
         selection = selection + ")";
 
-        ContentResolver cr = reactContext.getContentResolver();
         Uri uri = CalendarContract.Calendars.CONTENT_URI;
         return cr.update(uri, getEventValues(detail),selection, params.toArray(new String[0]));
     }
