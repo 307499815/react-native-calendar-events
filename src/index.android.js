@@ -30,15 +30,15 @@ export default {
     return RNCalendarEvents.findCalendarId(name);
   },
 
-  async saveEvents (detailsList) {
+  async saveEvents(detailsList) {
     return RNCalendarEvents.saveEvents(detailsList)
   },
   
-  async saveEvent (detail) {
+  async saveEvent(detail) {
     return RNCalendarEvents.saveEvent(detail)
   },
 
-  async removeEvents (detail) {
+  async removeEvents(detail) {
     return RNCalendarEvents.removeEvents(detail)
   },
   async updateEvent(detail) {
