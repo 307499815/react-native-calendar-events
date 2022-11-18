@@ -295,6 +295,15 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         return count;
     }
 
+    private int addEvent(ReadableMap detail) throws Exception {
+        ContentResolver cr = reactContext.getContentResolver();
+        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        ContentValues values = getEventValues(detail);
+        if(values == null) return 0;
+        Uri calendarUri = cr.insert(uri, values);
+        return Integer.parseInt(calendarUri.getLastPathSegment());
+    }
+
     private int removeEvents(ReadableMap detail) throws Exception {
         String title = detail.getString("title");
         String location = detail.getString("location");
@@ -809,6 +818,30 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             thread.start();
         } catch (Exception e) {
             promise.reject("saveEvents error", e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void saveEvent(final ReadableMap detail, final Promise promise) {
+        if (!this.haveCalendarPermissions(false)) {
+            promise.reject("denied", new Exception("no permission"));
+            return;
+        }
+        try {
+            Thread thread = new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    try {
+                        int eventId = addEvent(detail);
+                        promise.resolve(eventId);
+                    } catch (Exception e) {
+                        promise.reject("saveEvent error", e.getMessage());
+                    }
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            promise.reject("saveEvent error", e.getMessage());
         }
     }
 
