@@ -34,6 +34,10 @@ export default {
     return RNCalendarEvents.saveEvents(detailsList)
   },
   
+  async saveEvent (detail) {
+    return RNCalendarEvents.saveEvent(detail)
+  },
+
   async removeEvents (detail) {
     return RNCalendarEvents.removeEvents(detail)
   },
