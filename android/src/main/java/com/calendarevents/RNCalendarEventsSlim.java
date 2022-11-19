@@ -208,6 +208,8 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         calendarValues.put(CalendarContract.Calendars.OWNER_ACCOUNT, details.getString("ownerAccount"));
         calendarValues.put(CalendarContract.Calendars.NAME, details.getString("name"));
         calendarValues.put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, details.getString("title"));
+        calendarValues.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
+        calendarValues.put(CalendarContract.Calendars.VISIBLE, 1);
         // end required fields
 
         Uri.Builder uriBuilder = CalendarContract.Calendars.CONTENT_URI.buildUpon();
@@ -312,6 +314,9 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         if(values.containsKey("calendarId")) {
             syncCalendar(cr, values.getAsString("calendarId"));
         }
+        if(detail.hasKey("calendarName") && detail.hasKey("calendarType")) {
+            uri = eventUriAsSyncAdapter(uri, detail.getString("calendarName"), detail.getString("calendarType"));
+        }
         Uri calendarUri = cr.insert(uri, values);
         int eventId = Integer.parseInt(calendarUri.getLastPathSegment());
 
@@ -340,12 +345,25 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     }
 
     private void syncCalendar(ContentResolver cr, String calendarId) {
-        ContentValues values = new ContentValues();
-        values.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
-        values.put(CalendarContract.Calendars.VISIBLE, 1);
-
-        cr.update(ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, Long.parseLong(calendarId)), values, null, null);
+//        ContentValues values = new ContentValues();
+//        values.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
+//        values.put(CalendarContract.Calendars.VISIBLE, 1);
+//
+//        cr.update(ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, Long.parseLong(calendarId)), values, null, null);
     }
+
+    //sync adaptors
+    private Uri eventUriAsSyncAdapter (Uri uri, String accountName, String accountType) {
+        return uri;
+//        uri = uri.buildUpon()
+//                .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
+//                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, accountName)
+//                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, accountType)
+//                .build();
+//
+//        return uri;
+    }
+
     private int removeEvents(ReadableMap detail) throws Exception {
         Log.i("removeEvents",detail.toString());
         String title = detail.getString("title");
@@ -384,6 +402,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             selection = selection + " and ("+CalendarContract.Events.CALENDAR_ID+" = " + calendarId + " ) ";
         }
         selection = selection + ")";
+        Log.i("removeEvents", TextUtils.join(",",params.toArray(new String[0])));
         int count = cr.delete(uri, selection, params.toArray(new String[0]));
         return count;
     }
