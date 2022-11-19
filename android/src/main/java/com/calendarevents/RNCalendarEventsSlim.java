@@ -297,7 +297,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
 
     private int addEvent(ReadableMap detail) throws Exception {
         ContentResolver cr = reactContext.getContentResolver();
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        Uri uri = CalendarContract.Events.CONTENT_URI;
         ContentValues values = getEventValues(detail);
         if(values == null) return 0;
         Uri calendarUri = cr.insert(uri, values);
@@ -320,7 +320,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             return 0;
         }
 
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        Uri uri = CalendarContract.Events.CONTENT_URI;
         List<String> params = new ArrayList<>();
         String selection = "((" + CalendarContract.Events.DELETED + " != 1) ";
         if(!TextUtils.isEmpty(title)) {
@@ -375,7 +375,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         }
         selection = selection + ")";
 
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        Uri uri = CalendarContract.Events.CONTENT_URI;
         return cr.update(uri, getEventValues(detail),selection, params.toArray(new String[0]));
     }
 
