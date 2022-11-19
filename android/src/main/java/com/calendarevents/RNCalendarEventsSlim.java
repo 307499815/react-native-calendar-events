@@ -858,8 +858,13 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                 @Override
                 public void run() {
                     try {
-                        int count = bulkAddEvents(details);
-                        promise.resolve(count);
+                        WritableNativeArray ids = new WritableNativeArray();
+                        for(int i = 0; i < details.size(); i++) {
+                            int eventId = addEvent(details.getMap(i));
+                            ids.pushInt(eventId);
+                        }
+//                        int count = bulkAddEvents(details);
+                        promise.resolve(ids);
                     } catch (Exception e) {
                         promise.reject("saveEvents error", e.getMessage());
                     }
