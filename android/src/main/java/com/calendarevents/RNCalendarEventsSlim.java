@@ -282,16 +282,24 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         ContentResolver cr = reactContext.getContentResolver();
         Uri uri = CalendarContract.Events.CONTENT_URI;
         List<ContentValues> valuesList = new ArrayList<>();
+        String calendarId = null;
         for(int i = 0; i < details.size(); i++) {
             ReadableMap info = details.getMap(i);
             ContentValues values = getEventValues(info);
+            if(TextUtils.isEmpty(calendarId) && values.containsKey("calendarId")) {
+                calendarId = values.getAsString("calendarId");
+            }
             valuesList.add(values);
+        }
+        if(!TextUtils.isEmpty(calendarId)) {
+            syncCalendar(cr, calendarId);
         }
 
         int count = 0;
         if(valuesList.size() > 0) {
             count = cr.bulkInsert(uri,valuesList.toArray(new ContentValues[0]));
         }
+
         return count;
     }
 
@@ -300,11 +308,46 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         Uri uri = CalendarContract.Events.CONTENT_URI;
         ContentValues values = getEventValues(detail);
         if(values == null) return 0;
+
+        if(values.containsKey("calendarId")) {
+            syncCalendar(cr, values.getAsString("calendarId"));
+        }
         Uri calendarUri = cr.insert(uri, values);
-        return Integer.parseInt(calendarUri.getLastPathSegment());
+        int eventId = Integer.parseInt(calendarUri.getLastPathSegment());
+
+        if (detail.hasKey("alarms")) {
+            createRemindersForEvent(cr, eventId, detail.getArray("alarms"));
+        }
+
+        return eventId;
     }
 
+    private void createRemindersForEvent(ContentResolver resolver, int eventID, ReadableArray reminders) {
+        for (int i = 0; i < reminders.size(); i++) {
+            ReadableMap reminder = reminders.getMap(i);
+            ReadableType type = reminder.getType("date");
+            if (type == ReadableType.Number) {
+                int minutes = reminder.getInt("date");
+                ContentValues reminderValues = new ContentValues();
+
+                reminderValues.put(CalendarContract.Reminders.EVENT_ID, eventID);
+                reminderValues.put(CalendarContract.Reminders.MINUTES, minutes);
+                reminderValues.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+
+                resolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues);
+            }
+        }
+    }
+
+    private void syncCalendar(ContentResolver cr, String calendarId) {
+        ContentValues values = new ContentValues();
+        values.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
+        values.put(CalendarContract.Calendars.VISIBLE, 1);
+
+        cr.update(ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, Long.parseLong(calendarId)), values, null, null);
+    }
     private int removeEvents(ReadableMap detail) throws Exception {
+        Log.i("removeEvents",detail.toString());
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
@@ -316,6 +359,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         ContentResolver cr = reactContext.getContentResolver();
         if(eventId > 0) {
             Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
+            Log.i("removeEvents1",uri.toString());
             return cr.delete(uri, null, null);
         }
 
