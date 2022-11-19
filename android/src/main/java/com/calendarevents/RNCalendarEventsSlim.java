@@ -280,7 +280,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
 
     private int bulkAddEvents(ReadableArray details) throws Exception {
         ContentResolver cr = reactContext.getContentResolver();
-        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        Uri uri = CalendarContract.Events.CONTENT_URI;
         List<ContentValues> valuesList = new ArrayList<>();
         for(int i = 0; i < details.size(); i++) {
             ReadableMap info = details.getMap(i);
@@ -833,7 +833,6 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             promise.reject("denied", new Exception("no permission"));
             return;
         }
-        Log.i("###saveEvent","saveEvent");
         try {
             Thread thread = new Thread(new Runnable(){
                 @Override
