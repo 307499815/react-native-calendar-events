@@ -108,7 +108,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         return writePermission == PackageManager.PERMISSION_GRANTED &&
                 readPermission == PackageManager.PERMISSION_GRANTED;
     }
-    
+
     private boolean shouldShowRequestPermissionRationale(boolean readOnly) {
         Activity currentActivity = getCurrentActivity();
 
@@ -308,11 +308,14 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
-        String eventId = detail.getString("eventId");
+        int eventId = 0;
+        if(detail.hasKey("eventId")) {
+            eventId = detail.getInt("eventId");
+        }
 
         ContentResolver cr = reactContext.getContentResolver();
-        if(!TextUtils.isEmpty(eventId)) {
-            Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, (long) Integer.parseInt(eventId));
+        if(eventId > 0) {
+            Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
             return cr.delete(uri, null, null);
         }
 
@@ -345,12 +348,15 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
-        String eventId = detail.getString("eventId");
+        int eventId = 0;
+        if(detail.hasKey("eventId")) {
+            eventId = detail.getInt("eventId");
+        }
 
         ContentResolver cr = reactContext.getContentResolver();
 
-        if(!TextUtils.isEmpty(eventId)) {
-            Uri updateUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+        if(eventId > 0) {
+            Uri updateUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
             return cr.update(updateUri, getEventValues(detail), null, null);
         }
 
@@ -493,7 +499,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                 if (recurrenceRule.hasKey("weekPositionInMonth")) {
                     weekPositionInMonth = recurrenceRule.getInt("weekPositionInMonth");
                 }
-                
+
                 if (recurrenceRule.hasKey("daysOfMonth")) {
                     daysOfMonth = recurrenceRule.getArray("daysOfMonth");
                 }
@@ -678,7 +684,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         } else if (!permissionRequested) {
             promise.resolve("undetermined");
         } else if(this.shouldShowRequestPermissionRationale(readOnly)) {
-            promise.resolve("denied"); 
+            promise.resolve("denied");
         } else {
             promise.resolve("restricted");
         }
@@ -708,12 +714,12 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             Thread thread = new Thread(new Runnable(){
                 @Override
                 public void run() {
-                try {
-                    Integer calendarID = addCalendar(options);
-                    promise.resolve(calendarID.toString());
-                } catch (Exception e) {
-                    promise.reject("save calendar error", e.getMessage());
-                }
+                    try {
+                        Integer calendarID = addCalendar(options);
+                        promise.resolve(calendarID.toString());
+                    } catch (Exception e) {
+                        promise.reject("save calendar error", e.getMessage());
+                    }
                 }
             });
             thread.start();
@@ -758,12 +764,12 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             Thread thread = new Thread(new Runnable(){
                 @Override
                 public void run() {
-                try {
-                    boolean successful = removeCalendar(CalendarID);
-                    promise.resolve(successful);
-                } catch (Exception e) {
-                    promise.reject("error removing calendar", e.getMessage());
-                }
+                    try {
+                        boolean successful = removeCalendar(CalendarID);
+                        promise.resolve(successful);
+                    } catch (Exception e) {
+                        promise.reject("error removing calendar", e.getMessage());
+                    }
                 }
             });
             thread.start();
@@ -827,6 +833,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             promise.reject("denied", new Exception("no permission"));
             return;
         }
+        Log.i("###saveEvent","saveEvent");
         try {
             Thread thread = new Thread(new Runnable(){
                 @Override
