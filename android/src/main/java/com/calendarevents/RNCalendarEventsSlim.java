@@ -365,7 +365,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     }
 
     private int removeEvents(ReadableMap detail) throws Exception {
-        Log.i("removeEvents",detail.toString());
+//        Log.i("removeEvents",detail.toString());
         String title = detail.getString("title");
         String location = detail.getString("location");
         String calendarId = detail.getString("calendarId");
@@ -377,7 +377,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         ContentResolver cr = reactContext.getContentResolver();
         if(eventId > 0) {
             Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
-            Log.i("removeEvents1",uri.toString());
+//            Log.i("removeEvents1",uri.toString());
             return cr.delete(uri, null, null);
         }
 
@@ -402,7 +402,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             selection = selection + " and ("+CalendarContract.Events.CALENDAR_ID+" = " + calendarId + " ) ";
         }
         selection = selection + ")";
-        Log.i("removeEvents", TextUtils.join(",",params.toArray(new String[0])));
+//        Log.i("removeEvents", TextUtils.join(",",params.toArray(new String[0])));
         int count = cr.delete(uri, selection, params.toArray(new String[0]));
         return count;
     }
