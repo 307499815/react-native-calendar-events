@@ -366,12 +366,26 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
 
     private int removeEvents(ReadableMap detail) throws Exception {
 //        Log.i("removeEvents",detail.toString());
-        String title = detail.getString("title");
-        String location = detail.getString("location");
-        String calendarId = detail.getString("calendarId");
+        String calendarId = null;
+        String location = null;
+        String title = null;
         int eventId = 0;
+        ReadableArray eventIds = null;
+
+        if(detail.hasKey("title")) {
+            title = detail.getString("title");
+        }
+        if(detail.hasKey("location")) {
+            location = detail.getString("location");
+        }
+        if(detail.hasKey("calendarId")) {
+            calendarId = detail.getString("calendarId");
+        }
         if(detail.hasKey("eventId")) {
             eventId = detail.getInt("eventId");
+        }
+        if(detail.hasKey("eventIds")) {
+            eventIds = detail.getArray("eventIds");
         }
 
         ContentResolver cr = reactContext.getContentResolver();
@@ -381,7 +395,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             return cr.delete(uri, null, null);
         }
 
-        if(TextUtils.isEmpty(title) && TextUtils.isEmpty(location) && TextUtils.isEmpty(calendarId)) {
+        if(TextUtils.isEmpty(title) && TextUtils.isEmpty(location) && TextUtils.isEmpty(calendarId) && (eventIds == null || eventIds.size() <= 0)) {
             return 0;
         }
 
@@ -401,8 +415,18 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         if(!TextUtils.isEmpty(calendarId)) {
             selection = selection + " and ("+CalendarContract.Events.CALENDAR_ID+" = " + calendarId + " ) ";
         }
+
+        if(eventIds != null && eventIds.size() > 0) {
+            StringBuilder idList = new StringBuilder();
+            for(int i = 0; i < eventIds.size(); i++) {
+                int id = eventIds.getInt(i);
+                if(idList.length() > 0) idList.append(",");
+                idList.append(id);
+            }
+            selection = selection + " and ("+CalendarContract.Events._ID+" in ("+idList+")) ";
+        }
         selection = selection + ")";
-//        Log.i("removeEvents", TextUtils.join(",",params.toArray(new String[0])));
+        Log.i("removeEvents", TextUtils.join(",",params.toArray(new String[0])));
         int count = cr.delete(uri, selection, params.toArray(new String[0]));
         return count;
     }
@@ -523,6 +547,9 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                 String endDate = null;
                 ReadableArray daysOfWeek = null;
                 ReadableArray daysOfMonth = null;
+                ReadableArray hoursOfDay = null;
+                ReadableArray minutesOfHour = null;
+
                 String weekStart = null;
                 Integer weekPositionInMonth = null;
 
@@ -567,7 +594,15 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                     daysOfMonth = recurrenceRule.getArray("daysOfMonth");
                 }
 
-                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth);
+                if (recurrenceRule.hasKey("hoursOfDay")) {
+                    hoursOfDay = recurrenceRule.getArray("hoursOfDay");
+                }
+
+                if (recurrenceRule.hasKey("minutesOfDay")) {
+                    minutesOfHour = recurrenceRule.getArray("minutesOfDay");
+                }
+
+                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth, hoursOfDay, minutesOfHour);
                 if (duration != null) {
                     eventValues.put(CalendarContract.Events.DURATION, duration);
                 }
@@ -683,7 +718,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     }
 
     //region Recurrence Rule
-    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence, ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth) {
+    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence, ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth, ReadableArray hoursOfDay , ReadableArray minutesOfHour) {
         String rrule;
 
         if (recurrence.equals("daily")) {
@@ -700,6 +735,14 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
 
         if (daysOfWeek != null && recurrence.equals("weekly")) {
             rrule += ";BYDAY=" + ReadableArrayToString(daysOfWeek);
+        }
+
+        if(hoursOfDay != null) {
+            rrule += ";BYHOUR=" + ReadableArrayToString(hoursOfDay);
+        }
+
+        if(minutesOfHour != null) {
+            rrule += ";BYMINUTE=" + ReadableArrayToString(minutesOfHour);
         }
 
         if (recurrence.equals("monthly") && daysOfWeek != null && weekPositionInMonth != null) {
