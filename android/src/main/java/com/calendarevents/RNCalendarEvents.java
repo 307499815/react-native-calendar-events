@@ -1018,7 +1018,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
             return null;
         }
 
-        if(weeks != null && recurrence.equals("weekly")) {
+        if(weeks != null && recurrence.equals("yearly")) {
             rrule += ";BYWEEKNO=" + ReadableArrayToString(weeks);
         }
 
