@@ -532,7 +532,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
         }
 
         if (details.hasKey("recurrence")) {
-            String rule = createRecurrenceRule(details.getString("recurrence"), null, null, null, null, null, null, null);
+            String rule = createRecurrenceRule(details.getString("recurrence"), null, null, null, null, null, null, null, null);
             if (rule != null) {
                 eventValues.put(CalendarContract.Events.RRULE, rule);
             }
@@ -547,6 +547,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 Integer interval = null;
                 Integer occurrence = null;
                 String endDate = null;
+                ReadableArray weeks = null;
                 ReadableArray daysOfWeek = null;
                 ReadableArray daysOfMonth = null;
                 String weekStart = null;
@@ -593,7 +594,11 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                     daysOfMonth = recurrenceRule.getArray("daysOfMonth");
                 }
 
-                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth);
+                if(recurrenceRule.hasKey("weeks")) {
+                    weeks = recurrenceRule.getArray("weeks");
+                }
+
+                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, weeks, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth);
                 if (duration != null) {
                     eventValues.put(CalendarContract.Events.DURATION, duration);
                 }
