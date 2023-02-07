@@ -998,7 +998,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
     }
 
     //region Recurrence Rule
-    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence, ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth) {
+    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence, ReadableArray weeks,ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth) {
         String rrule;
 
         if (recurrence.equals("daily")) {
@@ -1013,9 +1013,14 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
             return null;
         }
 
+        if(weeks != null && recurrence.equals("weekly")) {
+            rrule += ";BYWEEKNO=" + ReadableArrayToString(weeks);
+        }
+
         if (daysOfWeek != null && recurrence.equals("weekly")) {
             rrule += ";BYDAY=" + ReadableArrayToString(daysOfWeek);
         }
+
 
         if (recurrence.equals("monthly") && daysOfWeek != null && weekPositionInMonth != null) {
             rrule += ";BYSETPOS=" + weekPositionInMonth;
