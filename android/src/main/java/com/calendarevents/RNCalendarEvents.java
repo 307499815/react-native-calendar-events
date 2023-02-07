@@ -1022,7 +1022,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
             rrule += ";BYWEEKNO=" + ReadableArrayToString(weeks);
         }
 
-        if (daysOfWeek != null && recurrence.equals("weekly")) {
+        if (daysOfWeek != null) {
             rrule += ";BYDAY=" + ReadableArrayToString(daysOfWeek);
         }
 
