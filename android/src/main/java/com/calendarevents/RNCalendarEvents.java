@@ -605,6 +605,7 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 if (rule != null) {
                     eventValues.put(CalendarContract.Events.RRULE, rule);
                 }
+                Log.i("##Calendar", rule);
             }
         }
 
