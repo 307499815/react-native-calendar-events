@@ -530,7 +530,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
         }
 
         if (details.hasKey("recurrence")) {
-            String rule = createRecurrenceRule(details.getString("recurrence"), null, null, null, null, null, null, null, null, null);
+            String rule = createRecurrenceRule(details.getString("recurrence"), null, null, null, null,null, null, null, null, null, null);
             if (rule != null) {
                 eventValues.put(CalendarContract.Events.RRULE, rule);
             }
@@ -549,6 +549,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                 ReadableArray daysOfMonth = null;
                 ReadableArray hoursOfDay = null;
                 ReadableArray minutesOfHour = null;
+                ReadableArray weeks = null;
 
                 String weekStart = null;
                 Integer weekPositionInMonth = null;
@@ -602,7 +603,11 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                     minutesOfHour = recurrenceRule.getArray("minutesOfDay");
                 }
 
-                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth, hoursOfDay, minutesOfHour);
+                if(recurrenceRule.hasKey("weeks")) {
+                    weeks = recurrenceRule.getArray("weeks");
+                }
+
+                String rule = createRecurrenceRule(frequency, interval, endDate, occurrence, weeks, daysOfWeek, weekStart, weekPositionInMonth, daysOfMonth, hoursOfDay, minutesOfHour);
                 if (duration != null) {
                     eventValues.put(CalendarContract.Events.DURATION, duration);
                 }
@@ -718,7 +723,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     }
 
     //region Recurrence Rule
-    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence, ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth, ReadableArray hoursOfDay , ReadableArray minutesOfHour) {
+    private String createRecurrenceRule(String recurrence, Integer interval, String endDate, Integer occurrence,ReadableArray weeks, ReadableArray daysOfWeek, String weekStart, Integer weekPositionInMonth, ReadableArray daysOfMonth, ReadableArray hoursOfDay , ReadableArray minutesOfHour) {
         String rrule;
 
         if (recurrence.equals("daily")) {
@@ -745,6 +750,10 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             rrule += ";BYMINUTE=" + ReadableArrayToString(minutesOfHour);
         }
 
+        if(weeks != null && recurrence.equals("yearly")) {
+            rrule += ";BYWEEKNO=" + ReadableArrayToString(weeks);
+        }
+
         if (recurrence.equals("monthly") && daysOfWeek != null && weekPositionInMonth != null) {
             rrule += ";BYSETPOS=" + weekPositionInMonth;
             rrule += ";BYDAY=" + ReadableArrayToString(daysOfWeek);
@@ -766,6 +775,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             rrule += ";COUNT=" + occurrence;
         }
 
+        Log.i("#RRULE", rrule);
         return rrule;
     }
     //endregion
