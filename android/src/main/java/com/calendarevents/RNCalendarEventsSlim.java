@@ -738,7 +738,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
             return null;
         }
 
-        if (daysOfWeek != null && recurrence.equals("weekly")) {
+        if (daysOfWeek != null) {
             rrule += ";BYDAY=" + ReadableArrayToString(daysOfWeek);
         }
 
