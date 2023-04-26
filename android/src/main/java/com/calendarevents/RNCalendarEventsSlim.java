@@ -527,6 +527,8 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                 e.printStackTrace();
                 throw e;
             }
+        } else {
+            eventValues.put(CalendarContract.Events.DTEND, (Long)null);
         }
 
         if (details.hasKey("recurrence")) {
@@ -615,6 +617,9 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
                     eventValues.put(CalendarContract.Events.RRULE, rule);
                 }
             }
+        } else {
+            eventValues.put(CalendarContract.Events.DURATION, (Long)null);
+            eventValues.put(CalendarContract.Events.RRULE, (String)null);
         }
 
         if (details.hasKey("allDay")) {
