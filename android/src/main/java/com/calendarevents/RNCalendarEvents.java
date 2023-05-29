@@ -529,6 +529,8 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 e.printStackTrace();
                 throw e;
             }
+        } else {
+            eventValues.put(CalendarContract.Events.DTEND, (Long)null);
         }
 
         if (details.hasKey("recurrence")) {
@@ -607,6 +609,9 @@ public class RNCalendarEvents extends ReactContextBaseJavaModule implements Perm
                 }
                 Log.i("##Calendar", rule);
             }
+        } else {
+            eventValues.put(CalendarContract.Events.DURATION, (Long)null);
+            eventValues.put(CalendarContract.Events.RRULE, (String)null);
         }
 
         if (details.hasKey("allDay")) {
