@@ -828,7 +828,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void saveCalendar(final ReadableMap options, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -853,7 +853,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void findCalendarId(final String name, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -878,7 +878,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void removeCalendar(final String CalendarID, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -903,7 +903,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void removeCalendarByName(final String CalendarName, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -927,7 +927,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void saveEvents(final ReadableArray details, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -956,7 +956,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void saveEvent(final ReadableMap detail, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
         try {
@@ -980,7 +980,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void removeEvents(final ReadableMap detail, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
 
@@ -1006,7 +1006,7 @@ public class RNCalendarEventsSlim extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void updateEvent(final ReadableMap detail, final Promise promise) {
         if (!this.haveCalendarPermissions(false)) {
-            promise.reject("denied", new Exception("no permission"));
+            promise.reject("denied", "Calendar no permission");
             return;
         }
 
